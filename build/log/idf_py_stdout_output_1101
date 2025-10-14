@@ -1,0 +1,49 @@
+-- Found Git: /usr/bin/git (found version "2.43.0") 
+-- The C compiler identification is GNU 12.2.0
+-- The CXX compiler identification is GNU 12.2.0
+-- The ASM compiler identification is GNU
+-- Found assembler: /home/blank/.espressif/tools/xtensa-esp32s3-elf/esp-12.2.0_20230208/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-gcc
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /home/blank/.espressif/tools/xtensa-esp32s3-elf/esp-12.2.0_20230208/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /home/blank/.espressif/tools/xtensa-esp32s3-elf/esp-12.2.0_20230208/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Building ESP-IDF components for target esp32s3
+NOTICE: Dependencies lock doesn't exist, solving dependencies.
+..NOTICE: Updating lock file at /mnt/c/LocalRepo/ESP32-S3_Mastery/dependencies.lock
+NOTICE: Processing 2 dependencies:
+NOTICE: [1/2] espressif/led_strip (3.0.1~1)
+NOTICE: [2/2] idf (5.1.1)
+-- Project sdkconfig file /mnt/c/LocalRepo/ESP32-S3_Mastery/sdkconfig
+Loading defaults file /mnt/c/LocalRepo/ESP32-S3_Mastery/sdkconfig.defaults...
+Loading defaults file /mnt/c/LocalRepo/ESP32-S3_Mastery/sdkconfig.defaults.esp32s3...
+-- Looking for sys/types.h
+-- Looking for sys/types.h - found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Check size of time_t
+-- Check size of time_t - done
+-- Found Python3: /home/blank/.espressif/python_env/idf5.1_py3.12_env/bin/python (found version "3.12.3") found components: Interpreter 
+-- Performing Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS
+-- Performing Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS - Success
+-- App "blink" version: e6519dd-dirty
+-- Adding linker script /mnt/c/LocalRepo/ESP32-S3_Mastery/build/esp-idf/esp_system/ld/memory.ld
+-- Adding linker script /home/blank/esp/esp-idf/components/esp_system/ld/esp32s3/sections.ld.in
+-- Adding linker script /home/blank/esp/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.ld
+-- Adding linker script /home/blank/esp/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.api.ld
+-- Adding linker script /home/blank/esp/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.libgcc.ld
+-- Adding linker script /home/blank/esp/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.newlib.ld
+-- Adding linker script /home/blank/esp/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.version.ld
+-- Adding linker script /home/blank/esp/esp-idf/components/soc/esp32s3/ld/esp32s3.peripherals.ld
+-- Components: app_trace app_update bootloader bootloader_support bt cmock console cxx driver efuse esp-tls esp_adc esp_app_format esp_coex esp_common esp_eth esp_event esp_gdbstub esp_hid esp_http_client esp_http_server esp_https_ota esp_https_server esp_hw_support esp_lcd esp_local_ctrl esp_mm esp_netif esp_netif_stack esp_partition esp_phy esp_pm esp_psram esp_ringbuf esp_rom esp_system esp_timer esp_wifi espcoredump espressif__led_strip esptool_py fatfs freertos hal heap http_parser idf_test ieee802154 json log lwip main mbedtls mqtt newlib nvs_flash openthread partition_table perfmon protobuf-c protocomm pthread sdmmc soc spi_flash spiffs tcp_transport touch_element ulp unity usb vfs wear_levelling wifi_provisioning wpa_supplicant xtensa
+-- Component paths: /home/blank/esp/esp-idf/components/app_trace /home/blank/esp/esp-idf/components/app_update /home/blank/esp/esp-idf/components/bootloader /home/blank/esp/esp-idf/components/bootloader_support /home/blank/esp/esp-idf/components/bt /home/blank/esp/esp-idf/components/cmock /home/blank/esp/esp-idf/components/console /home/blank/esp/esp-idf/components/cxx /home/blank/esp/esp-idf/components/driver /home/blank/esp/esp-idf/components/efuse /home/blank/esp/esp-idf/components/esp-tls /home/blank/esp/esp-idf/components/esp_adc /home/blank/esp/esp-idf/components/esp_app_format /home/blank/esp/esp-idf/components/esp_coex /home/blank/esp/esp-idf/components/esp_common /home/blank/esp/esp-idf/components/esp_eth /home/blank/esp/esp-idf/components/esp_event /home/blank/esp/esp-idf/components/esp_gdbstub /home/blank/esp/esp-idf/components/esp_hid /home/blank/esp/esp-idf/components/esp_http_client /home/blank/esp/esp-idf/components/esp_http_server /home/blank/esp/esp-idf/components/esp_https_ota /home/blank/esp/esp-idf/components/esp_https_server /home/blank/esp/esp-idf/components/esp_hw_support /home/blank/esp/esp-idf/components/esp_lcd /home/blank/esp/esp-idf/components/esp_local_ctrl /home/blank/esp/esp-idf/components/esp_mm /home/blank/esp/esp-idf/components/esp_netif /home/blank/esp/esp-idf/components/esp_netif_stack /home/blank/esp/esp-idf/components/esp_partition /home/blank/esp/esp-idf/components/esp_phy /home/blank/esp/esp-idf/components/esp_pm /home/blank/esp/esp-idf/components/esp_psram /home/blank/esp/esp-idf/components/esp_ringbuf /home/blank/esp/esp-idf/components/esp_rom /home/blank/esp/esp-idf/components/esp_system /home/blank/esp/esp-idf/components/esp_timer /home/blank/esp/esp-idf/components/esp_wifi /home/blank/esp/esp-idf/components/espcoredump /mnt/c/LocalRepo/ESP32-S3_Mastery/managed_components/espressif__led_strip /home/blank/esp/esp-idf/components/esptool_py /home/blank/esp/esp-idf/components/fatfs /home/blank/esp/esp-idf/components/freertos /home/blank/esp/esp-idf/components/hal /home/blank/esp/esp-idf/components/heap /home/blank/esp/esp-idf/components/http_parser /home/blank/esp/esp-idf/components/idf_test /home/blank/esp/esp-idf/components/ieee802154 /home/blank/esp/esp-idf/components/json /home/blank/esp/esp-idf/components/log /home/blank/esp/esp-idf/components/lwip /mnt/c/LocalRepo/ESP32-S3_Mastery/main /home/blank/esp/esp-idf/components/mbedtls /home/blank/esp/esp-idf/components/mqtt /home/blank/esp/esp-idf/components/newlib /home/blank/esp/esp-idf/components/nvs_flash /home/blank/esp/esp-idf/components/openthread /home/blank/esp/esp-idf/components/partition_table /home/blank/esp/esp-idf/components/perfmon /home/blank/esp/esp-idf/components/protobuf-c /home/blank/esp/esp-idf/components/protocomm /home/blank/esp/esp-idf/components/pthread /home/blank/esp/esp-idf/components/sdmmc /home/blank/esp/esp-idf/components/soc /home/blank/esp/esp-idf/components/spi_flash /home/blank/esp/esp-idf/components/spiffs /home/blank/esp/esp-idf/components/tcp_transport /home/blank/esp/esp-idf/components/touch_element /home/blank/esp/esp-idf/components/ulp /home/blank/esp/esp-idf/components/unity /home/blank/esp/esp-idf/components/usb /home/blank/esp/esp-idf/components/vfs /home/blank/esp/esp-idf/components/wear_levelling /home/blank/esp/esp-idf/components/wifi_provisioning /home/blank/esp/esp-idf/components/wpa_supplicant /home/blank/esp/esp-idf/components/xtensa
+-- Configuring done (17.8s)
+-- Generating done (21.6s)
+-- Build files have been written to: /mnt/c/LocalRepo/ESP32-S3_Mastery/build
