@@ -6,6 +6,7 @@ The fun part is the WebGPU front end. The ESP32-S3 is not running WebGPU itself;
 The color of the Contrail matches the color of the LED on the ESP32-S3 development board.
 
 https://github.com/user-attachments/assets/f0bfb8a5-0dc4-4fcb-b1d9-cc6fe16c3165
+<img width="953" height="599" alt="doom image" src="https://github.com/user-attachments/assets/81c645be-43e3-4f5e-b9aa-3aafc551bce4" />
 
 ## Build and flash (ESP-IDF + WSL)
 PlatformIO is not used. Use ESP-IDF directly.
