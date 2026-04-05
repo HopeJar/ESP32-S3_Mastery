@@ -3,6 +3,9 @@ This project is about pushing the ESP32-S3 toward a more real product shape: C++
 
 The current direction is browser-hosted Doom. The ESP32-S3 does not run WebGPU itself; it serves a secure page and the Doom web bundle, while the browser runs the Doom core in WebAssembly and uses WebGPU to present frames and capture web inputs. That split is useful because the board stays focused on embedded work like networking and TLS, while the browser handles the heavier graphics and input layer.
 
+<img width="953" height="599" alt="doom image" src="https://github.com/user-attachments/assets/c7685fc6-e3f9-4af8-af80-2d78e2bb310d" />
+
+
 ## Browser Doom over HTTPS + WebGPU
 WebGPU requires a secure context, so the Doom page needs to be opened over HTTPS on the device.
 
