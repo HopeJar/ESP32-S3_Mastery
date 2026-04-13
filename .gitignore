@@ -72,7 +72,7 @@ main/secrets/Hidden/*
 # Local agent notes
 AGENTS.md
 
-# Local browser Doom assets and game data
+# Legacy local browser Doom assets and game data
 main/web/web_pages/doom/*.js
 main/web/web_pages/doom/*.wasm
 main/web/web_pages/doom/*.data

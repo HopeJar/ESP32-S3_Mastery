@@ -13,6 +13,7 @@ namespace WiFi {
 struct Config {
     const char* ssid;
     const char* password;
+    bool connect_sta;
     bool use_static_ip;
     uint8_t static_ip[4];
     uint8_t static_gateway[4];
@@ -20,6 +21,11 @@ struct Config {
     bool use_custom_dns;
     uint8_t dns_server[4];
     const char* hostname;
+    bool start_ap;
+    const char* ap_ssid;
+    const char* ap_password;
+    uint8_t ap_channel;
+    uint8_t ap_max_connections;
 };
 
 /**
@@ -38,6 +44,12 @@ void process();
  * @return true if connected, false otherwise
  */
 bool is_connected();
+
+/**
+ * @brief Check if the setup access point is running
+ * @return true if AP mode is active
+ */
+bool is_ap_started();
 
 /**
  * @brief Cleanup and deinitialize the WiFi driver

@@ -3,15 +3,161 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ESP32 Doom</title>
+    <title>ESP Quake</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <main class="stage">
-      <canvas id="doom-canvas" width="640" height="400" aria-label="Doom display"></canvas>
-      <div id="status" class="status" role="status" aria-live="polite">Loading Doom...</div>
+    <main class="shell">
+      <section id="menu" class="menu" aria-label="Match setup">
+        <div class="menu__inner">
+          <header class="menu__header">
+            <div>
+              <p class="eyebrow">ESP32-S3 Local Server</p>
+              <h1 id="server-title">ESP Quake</h1>
+            </div>
+            <div class="connection">
+              <span id="site-name-label">espquake.local</span>
+              <span id="network-state">Loading</span>
+            </div>
+          </header>
+
+          <section class="panel intro-panel" aria-label="Join match">
+            <div>
+              <h2>Enter Match</h2>
+              <p id="match-summary">q2dm1, continuous match</p>
+            </div>
+            <form id="join-form" class="form join-form">
+              <label>
+                Player name
+                <input id="player-name" name="player-name" maxlength="20" autocomplete="nickname" value="ranger" />
+              </label>
+              <button type="submit">Enter Match</button>
+            </form>
+          </section>
+
+          <section class="panel admin-panel" aria-label="Admin control">
+            <div class="panel-heading">
+              <div>
+                <h2>Admin Control</h2>
+                <p id="admin-state">First connected player can claim admin.</p>
+              </div>
+              <span id="admin-badge">Unclaimed</span>
+            </div>
+
+            <form id="admin-setup-form" class="form admin-setup-form">
+              <label>
+                Admin password
+                <input id="admin-setup-password" maxlength="64" type="password" autocomplete="new-password" />
+              </label>
+              <label>
+                Confirm password
+                <input id="admin-setup-confirm" maxlength="64" type="password" autocomplete="new-password" />
+              </label>
+              <button type="submit">Claim Admin</button>
+            </form>
+
+            <form id="admin-login-form" class="form admin-login-form" hidden>
+              <label>
+                Admin password
+                <input id="admin-login-password" maxlength="64" type="password" autocomplete="current-password" />
+              </label>
+              <button type="submit">Unlock Controls</button>
+            </form>
+
+            <form id="admin-settings-form" class="form admin-settings-form" hidden>
+              <label>
+                Local site name
+                <input id="site-name" maxlength="63" autocomplete="off" />
+              </label>
+              <label>
+                Server name
+                <input id="server-name" maxlength="39" autocomplete="off" />
+              </label>
+              <label>
+                Match type
+                <select id="match-mode">
+                  <option value="ffa">Free for All</option>
+                  <option value="teams">Teams</option>
+                </select>
+              </label>
+              <label>
+                Max players
+                <input id="max-players" type="number" min="1" max="8" step="1" />
+              </label>
+              <label>
+                Time limit minutes
+                <input id="time-limit" type="number" min="0" max="240" step="1" />
+              </label>
+              <label>
+                Frag limit
+                <input id="frag-limit" type="number" min="0" max="999" step="1" />
+              </label>
+              <label>
+                Team score limit
+                <input id="team-score-limit" type="number" min="0" max="999" step="1" />
+              </label>
+              <label class="check-label">
+                <input id="friendly-fire" type="checkbox" />
+                Friendly fire
+              </label>
+              <div class="button-row">
+                <button type="submit">Save Admin Settings</button>
+                <button id="reboot-button" type="button" class="secondary">Reboot</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel network-panel" aria-label="Network setup">
+            <div class="panel-heading">
+              <div>
+                <h2>Network</h2>
+                <p>AP and STA changes apply after reboot.</p>
+              </div>
+            </div>
+            <form id="network-form" class="form network-form">
+              <label>
+                Network mode
+                <select id="network-mode" name="network-mode">
+                  <option value="apsta">AP + STA</option>
+                  <option value="ap">AP only</option>
+                  <option value="sta">STA only</option>
+                </select>
+              </label>
+              <label>
+                STA SSID
+                <input id="sta-ssid" name="sta-ssid" maxlength="32" autocomplete="off" />
+              </label>
+              <label>
+                STA password
+                <input id="sta-password" name="sta-password" maxlength="64" type="password" autocomplete="new-password" />
+              </label>
+              <label>
+                AP SSID
+                <input id="ap-ssid" name="ap-ssid" maxlength="32" autocomplete="off" />
+              </label>
+              <label>
+                AP password
+                <input id="ap-password" name="ap-password" maxlength="64" type="password" autocomplete="new-password" />
+              </label>
+              <button type="submit">Save Network</button>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <section id="game" class="game" hidden>
+        <canvas id="game-canvas" aria-label="Q2DM1 viewport"></canvas>
+        <div class="hud">
+          <span id="match-label">q2dm1</span>
+          <span id="player-count">0 players</span>
+          <span id="score-label">0 / 30</span>
+          <span id="position-label">0 0 0</span>
+        </div>
+      </section>
+
+      <div id="status" class="status" role="status" aria-live="polite">Loading setup...</div>
     </main>
 
-    <script src="/control.js"></script>
+    <script type="module" src="/control.js"></script>
   </body>
 </html>

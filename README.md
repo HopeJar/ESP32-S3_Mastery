@@ -1,40 +1,30 @@
 # ESP32-S3_Mastery
 This project is about pushing the ESP32-S3 toward a more real product shape: C++, Wi-Fi, HTTPS, and a browser UI that feels more like a proper console than a debug page.
 
-The current direction is browser-hosted Doom. The ESP32-S3 does not run WebGPU itself; it serves a secure page and the Doom web bundle, while the browser runs the Doom core in WebAssembly and uses WebGPU to present frames and capture web inputs. That split is useful because the board stays focused on embedded work like networking and TLS, while the browser handles the heavier graphics and input layer.
+The current direction is a browser-hosted Quake 2 deathmatch prototype. The ESP32-S3 serves the setup page, the q2dm1 BSP map, the local Three.js runtime, and a small HTTP API for network setup plus continuous multiplayer state. The browser renders the map and polls the ESP32 for player positions.
 
-<img width="953" height="599" alt="doom image" src="https://github.com/user-attachments/assets/c7685fc6-e3f9-4af8-af80-2d78e2bb310d" />
+## Browser Quake 2 Q2DM1
 
+- The setup page is served from firmware at `/`.
+- The map is copied from `third_party/q2dm1bsp/q2dm1.bsp` into the `web_assets` SPIFFS image during the CMake configure step.
+- The browser module at `main/web/web_pages/control.js` parses Quake 2 BSP v38 geometry, renders the map with the vendored Three.js module, and uses HTTP polling for peer state.
+- The active API surface is under `/api/v1/`, including `/api/v1/network`, `/api/v1/match`, `/api/v1/match/join`, and `/api/v1/player/state`.
+- The match is continuous and in-memory. Rebooting the board clears joined players and runtime match state.
 
-## Browser Doom over HTTPS + WebGPU
-WebGPU requires a secure context, so the Doom page needs to be opened over HTTPS on the device.
+## Network Setup
 
-- The ESP32-S3 serves a tiny shell page from firmware and the larger Doom bundle from a SPIFFS partition.
-- The browser runs the Doom runtime from `doomgeneric.js` and `doomgeneric.wasm`.
-- WebGPU is used as the presentation layer for the Doom framebuffer.
-- The page now autostarts Doom on load, so `doomgeneric.data` must include a bundled IWAD.
-
-If the device falls back to plain HTTP because local certs are missing, the page can still load, but WebGPU launch will be blocked by the browser.
-
-## Build the Doom Browser Bundle (WSL)
-The repo includes a custom browser port source at `tools/doom_webgpu/doomgeneric_webgpu.c` and a build helper at `tools/doom_webgpu/build_webgpu_doom.sh`.
-
-Build the browser bundle with an embedded IWAD:
-
-```bash
-cd /mnt/c/LocalRepo/ESP32-S3_Mastery
-bash tools/doom_webgpu/build_webgpu_doom.sh --embed-iwad /full/path/to/doom1.wad
-```
-
-Notes:
-
-- `third_party/doomgeneric/doomgeneric` must exist locally.
-- `emcc` must be available in your active WSL shell.
-- The build outputs land in `main/web/web_pages/doom/`.
-- The repo does not include a WAD or IWAD. For this ESP32 flash layout, prefer a smaller IWAD such as shareware `doom1.wad`.
-- `.data` and `.wad` files in that folder are ignored by git to avoid accidentally committing game data.
+- On first boot without STA credentials, the board starts an AP named like `ESPQUAKE-ABCD`.
+- The setup page can save AP, STA, or AP + STA mode into NVS.
+- Saved network changes require reboot. Use the page's reboot button or reset the board.
 - `idf.py flash` will also flash the SPIFFS `web_assets` partition because the image is generated with `FLASH_IN_PROJECT`.
-- Large IWADs like `freedm.wad` do not fit in the current internal flash asset partition. `doom1.wad` is the practical target here.
+
+## Admin Setup
+
+- The first connected user can claim admin from the setup page by setting an admin password.
+- The firmware stores a salted SHA-256 password hash in NVS, not the plaintext password.
+- Once admin is claimed, match settings and network save/reboot actions require the admin password.
+- Admin settings include local site name, server name, FFA or teams, max players, time limit, frag limit, team score limit, and friendly fire.
+- The default local site name is `espquake.local`. The first label is also used as the DHCP hostname after reboot. Arbitrary names like `ESPQUAKE.com` still require LAN DNS/router support to resolve in STA mode.
 
 ## Flash Layout
 This setup assumes the board really has `8MB` flash, not the previous `2MB` header setting.
