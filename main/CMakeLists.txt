@@ -12,6 +12,7 @@ set(Q2_MAP_SOURCE "${PROJECT_ROOT_DIR}/third_party/q2dm1bsp/q2dm1.bsp")
 set(THREE_JS_SOURCE "${MAIN_COMPONENT_DIR}/web/web_pages/vendor/three.module.min.js")
 set(QUAKEJS_ENGINE_SOURCE "${PROJECT_ROOT_DIR}/third_party/quakejs-master/build/ioquake3.js")
 set(QUAKEJS_INDEX_SOURCE "${MAIN_COMPONENT_DIR}/web/web_pages/quake/index.html")
+set(QUAKEJS_MANIFEST_SOURCE "${MAIN_COMPONENT_DIR}/web/web_pages/quake/manifest.json")
 set(QUAKEJS_ASSETS_SOURCE "${PROJECT_ROOT_DIR}/third_party/quakejs-master/assets")
 set(Q2_WEB_ASSET_DIR "${CMAKE_CURRENT_BINARY_DIR}/q2_web_assets")
 set(GZIP_ASSET_SCRIPT "${PROJECT_ROOT_DIR}/tools/gzip_asset.py")
@@ -20,7 +21,8 @@ set(REQUIRED_Q2_ASSETS
      "${Q2_MAP_SOURCE}"
      "${THREE_JS_SOURCE}"
      "${QUAKEJS_ENGINE_SOURCE}"
-     "${QUAKEJS_INDEX_SOURCE}")
+     "${QUAKEJS_INDEX_SOURCE}"
+     "${QUAKEJS_MANIFEST_SOURCE}")
 
 set(MISSING_Q2_ASSETS "")
 foreach(Q2_ASSET IN LISTS REQUIRED_Q2_ASSETS)
@@ -44,6 +46,7 @@ file(REMOVE
      "${Q2_WEB_ASSET_DIR}/vendor/three.module.min.js"
      "${Q2_WEB_ASSET_DIR}/quake/ioquake3.js")
 configure_file("${QUAKEJS_INDEX_SOURCE}" "${Q2_WEB_ASSET_DIR}/quake/index.html" COPYONLY)
+configure_file("${QUAKEJS_MANIFEST_SOURCE}" "${Q2_WEB_ASSET_DIR}/manifest.json" COPYONLY)
 
 execute_process(COMMAND "${Python3_EXECUTABLE}" "${GZIP_ASSET_SCRIPT}" "${Q2_MAP_SOURCE}" "${Q2_WEB_ASSET_DIR}/maps/q2dm1.bsp.gz"
                 COMMAND_ERROR_IS_FATAL ANY)
