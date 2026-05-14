@@ -61,7 +61,8 @@ bool start(httpd_handle_t* handle) {
 #endif
     conf.prvtkey_pem = server_key_pem_start;
     conf.prvtkey_len = static_cast<size_t>(server_key_pem_end - server_key_pem_start);
-    conf.httpd.max_uri_handlers = 24;
+    conf.httpd.max_uri_handlers = 28;
+    conf.httpd.uri_match_fn = httpd_uri_match_wildcard;
 
     if (httpd_ssl_start(handle, &conf) != ESP_OK) {
         APP_LOGW(kLog, "Failed to start HTTPS server");

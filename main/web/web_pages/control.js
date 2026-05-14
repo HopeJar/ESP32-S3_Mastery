@@ -2,6 +2,15 @@ import * as THREE from "/assets/vendor/three.module.min.js";
 
 const MAP_URL = "/assets/maps/q2dm1.bsp";
 const DEBUG_PIXELS = new URLSearchParams(window.location.search).has("debug-pixels");
+const DEFAULT_SITE_NAME = "espquake.local";
+const DEFAULT_SERVER_NAME = "ESP Quake";
+const DEFAULT_PLAYER_NAME = "ranger";
+const MAX_PLAYERS = 8;
+const NETWORK_SYNC_INTERVAL_MS = 125;
+const LOOK_SENSITIVITY = 0.0024;
+const WALK_SPEED = 420;
+const RUN_SPEED = 720;
+const MOVEMENT_KEYS = new Set(["KeyW", "KeyA", "KeyS", "KeyD", "Space", "ControlLeft", "ShiftLeft"]);
 const BSP_IDENT = 0x50534249;
 const BSP_VERSION = 38;
 const LUMPS = {
@@ -66,13 +75,14 @@ const state = {
   lastFrame: 0,
   lastSync: 0,
   syncInFlight: false,
+  controlsBound: false,
   running: false,
   adminPassword: "",
   settings: {
-    site_name: "espquake.local",
-    server_name: "ESP Quake",
+    site_name: DEFAULT_SITE_NAME,
+    server_name: DEFAULT_SERVER_NAME,
     match_mode: "ffa",
-    max_players: 8,
+    max_players: MAX_PLAYERS,
     time_limit_min: 20,
     frag_limit: 30,
     team_score_limit: 50,
@@ -88,6 +98,7 @@ function setStatus(message) {
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
+    cache: "no-store",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -95,7 +106,13 @@ async function api(path, options = {}) {
     },
   });
   const text = await response.text();
-  const data = text ? JSON.parse(text) : {};
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(`Invalid response from ${path}.`);
+  }
+
   if (!response.ok || data.ok === false) {
     throw new Error(data.error || response.statusText);
   }
@@ -109,10 +126,10 @@ function settingNumber(value, fallback) {
 
 function normalizeSettings(settings = {}) {
   return {
-    site_name: settings.site_name || "espquake.local",
-    server_name: settings.server_name || "ESP Quake",
+    site_name: settings.site_name || DEFAULT_SITE_NAME,
+    server_name: settings.server_name || DEFAULT_SERVER_NAME,
     match_mode: settings.match_mode === "teams" ? "teams" : "ffa",
-    max_players: Math.min(Math.max(settingNumber(settings.max_players, 8), 1), 8),
+    max_players: Math.min(Math.max(settingNumber(settings.max_players, MAX_PLAYERS), 1), MAX_PLAYERS),
     time_limit_min: Math.min(Math.max(settingNumber(settings.time_limit_min, 20), 0), 240),
     frag_limit: Math.min(Math.max(settingNumber(settings.frag_limit, 30), 0), 999),
     team_score_limit: Math.min(Math.max(settingNumber(settings.team_score_limit, 50), 0), 999),
@@ -357,7 +374,7 @@ async function loadMap() {
   if (state.map) return state.map;
 
   setStatus("Loading q2dm1.bsp...");
-  const response = await fetch(MAP_URL);
+  const response = await fetch(MAP_URL, { cache: "no-store" });
   if (!response.ok) {
     throw new Error("q2dm1.bsp was not available from the ESP32 asset partition.");
   }
@@ -452,10 +469,12 @@ function syncPeers(players) {
   }
 
   const count = players?.length || 1;
-  elements.playerCount.textContent = `${count} / ${state.settings.max_players} player${state.settings.max_players === 1 ? "" : "s"}`;
+  elements.playerCount.textContent = `${count} / ${state.settings.max_players} player${count === 1 ? "" : "s"}`;
 }
 
 function bindControls() {
+  if (state.controlsBound) return;
+  state.controlsBound = true;
   elements.canvas.tabIndex = 0;
   elements.canvas.addEventListener("click", () => {
     elements.canvas.focus();
@@ -464,7 +483,7 @@ function bindControls() {
 
   window.addEventListener("keydown", (event) => {
     state.keys.add(event.code);
-    if (["KeyW", "KeyA", "KeyS", "KeyD", "Space", "ControlLeft", "ShiftLeft"].includes(event.code)) {
+    if (MOVEMENT_KEYS.has(event.code)) {
       event.preventDefault();
     }
     if (event.code === "KeyR" && state.map) {
@@ -478,14 +497,14 @@ function bindControls() {
 
   window.addEventListener("mousemove", (event) => {
     if (document.pointerLockElement !== elements.canvas) return;
-    state.yaw -= event.movementX * 0.0024;
-    state.pitch -= event.movementY * 0.0024;
+    state.yaw -= event.movementX * LOOK_SENSITIVITY;
+    state.pitch -= event.movementY * LOOK_SENSITIVITY;
     state.pitch = THREE.MathUtils.clamp(state.pitch, -1.42, 1.42);
   });
 }
 
 function moveLocalPlayer(deltaSeconds) {
-  const speed = state.keys.has("ShiftLeft") ? 720 : 420;
+  const speed = state.keys.has("ShiftLeft") ? RUN_SPEED : WALK_SPEED;
   const amount = speed * deltaSeconds;
 
   state.camera.rotation.set(state.pitch, state.yaw, 0);
@@ -511,7 +530,7 @@ async function syncNetwork(force = false) {
   if (!state.player || state.syncInFlight) return;
 
   const now = performance.now();
-  if (!force && now - state.lastSync < 125) return;
+  if (!force && now - state.lastSync < NETWORK_SYNC_INTERVAL_MS) return;
 
   state.lastSync = now;
   state.syncInFlight = true;
@@ -565,7 +584,7 @@ async function enterMatch(name) {
   setStatus("Joining match...");
   const join = await api("/api/v1/match/join", {
     method: "POST",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name: name || DEFAULT_PLAYER_NAME }),
   });
 
   state.player = join.player;
@@ -604,7 +623,7 @@ async function loadNetworkSettings() {
 function bindForms() {
   elements.joinForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    const name = elements.playerName.value.trim() || "ranger";
+    const name = elements.playerName.value.trim() || DEFAULT_PLAYER_NAME;
     enterMatch(name).catch((error) => {
       console.error(error);
       setStatus(error instanceof Error ? error.message : "Join failed.");

@@ -172,19 +172,32 @@ static esp_err_t send_spiffs_file(httpd_req_t* req, const char* relative_path, c
         return send_text_error(req, "503 Service Unavailable", "Quake 2 assets unavailable");
     }
 
-    char full_path[160];
+    char full_path[164];
     const int path_len = std::snprintf(full_path, sizeof(full_path), "%s/%s", kAssetBasePath, relative_path);
     if (path_len <= 0 || path_len >= static_cast<int>(sizeof(full_path))) {
         return send_text_error(req, "500 Internal Server Error", "Asset path too long");
     }
 
+    bool gzip_encoded = false;
     std::FILE* file = std::fopen(full_path, "rb");
     if (file == nullptr) {
-        APP_LOGW(kLog, "Missing Quake 2 asset: %s", full_path);
-        return send_text_error(req, "404 Not Found", "Asset not found");
+        if (path_len + 3 >= static_cast<int>(sizeof(full_path))) {
+            return send_text_error(req, "500 Internal Server Error", "Asset path too long");
+        }
+
+        std::strcat(full_path, ".gz");
+        file = std::fopen(full_path, "rb");
+        gzip_encoded = file != nullptr;
+        if (file == nullptr) {
+            APP_LOGW(kLog, "Missing Quake 2 asset: %s", full_path);
+            return send_text_error(req, "404 Not Found", "Asset not found");
+        }
     }
 
     httpd_resp_set_type(req, type);
+    if (gzip_encoded) {
+        httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
+    }
     set_no_store_headers(req);
 
     char buffer[1400];
@@ -205,6 +218,28 @@ static esp_err_t send_spiffs_file(httpd_req_t* req, const char* relative_path, c
 
     std::fclose(file);
     return httpd_resp_send_chunk(req, nullptr, 0);
+}
+
+static const char* content_type_for_path(const char* path) {
+    const char* ext = std::strrchr(path, '.');
+    if (ext == nullptr) {
+        return "application/octet-stream";
+    }
+
+    if (std::strcmp(ext, ".html") == 0) return "text/html";
+    if (std::strcmp(ext, ".js") == 0) return "application/javascript";
+    if (std::strcmp(ext, ".css") == 0) return "text/css";
+    if (std::strcmp(ext, ".json") == 0) return "application/json";
+    if (std::strcmp(ext, ".pk3") == 0) return "application/octet-stream";
+    return "application/octet-stream";
+}
+
+static bool safe_asset_path(const char* path) {
+    return path != nullptr &&
+           path[0] != '\0' &&
+           path[0] != '/' &&
+           std::strstr(path, "..") == nullptr &&
+           std::strchr(path, '\\') == nullptr;
 }
 
 static void appendf(char*& out, size_t& remaining, const char* fmt, ...) {
@@ -779,6 +814,25 @@ static esp_err_t three_js_get_handler(httpd_req_t* req) {
     return send_spiffs_file(req, "vendor/three.module.min.js", "application/javascript");
 }
 
+static esp_err_t assets_get_handler(httpd_req_t* req) {
+    constexpr const char* prefix = "/assets/";
+    const size_t prefix_len = std::strlen(prefix);
+    const char* relative_path = req->uri + prefix_len;
+    if (std::strncmp(req->uri, prefix, prefix_len) != 0 || !safe_asset_path(relative_path)) {
+        return send_text_error(req, "400 Bad Request", "Invalid asset path");
+    }
+
+    return send_spiffs_file(req, relative_path, content_type_for_path(relative_path));
+}
+
+static esp_err_t quake_index_get_handler(httpd_req_t* req) {
+    return send_spiffs_file(req, "quake/index.html", "text/html");
+}
+
+static esp_err_t quake_engine_get_handler(httpd_req_t* req) {
+    return send_spiffs_file(req, "quake/ioquake3.js", "application/javascript");
+}
+
 static esp_err_t favicon_get_handler(httpd_req_t* req) {
     httpd_resp_set_status(req, "204 No Content");
     httpd_resp_set_type(req, "image/x-icon");
@@ -1189,8 +1243,12 @@ static esp_err_t register_handlers(httpd_handle_t handle) {
     if (err == ESP_OK) err = register_handler(handle, "/index.html", HTTP_GET, index_get_handler);
     if (err == ESP_OK) err = register_handler(handle, "/style.css", HTTP_GET, style_get_handler);
     if (err == ESP_OK) err = register_handler(handle, "/control.js", HTTP_GET, control_get_handler);
+    if (err == ESP_OK) err = register_handler(handle, "/quake", HTTP_GET, quake_index_get_handler);
+    if (err == ESP_OK) err = register_handler(handle, "/quake/", HTTP_GET, quake_index_get_handler);
+    if (err == ESP_OK) err = register_handler(handle, "/quake/ioquake3.js", HTTP_GET, quake_engine_get_handler);
     if (err == ESP_OK) err = register_handler(handle, "/assets/maps/q2dm1.bsp", HTTP_GET, q2_map_get_handler);
     if (err == ESP_OK) err = register_handler(handle, "/assets/vendor/three.module.min.js", HTTP_GET, three_js_get_handler);
+    if (err == ESP_OK) err = register_handler(handle, "/assets/*", HTTP_GET, assets_get_handler);
     if (err == ESP_OK) err = register_handler(handle, "/favicon.ico", HTTP_GET, favicon_get_handler);
     if (err == ESP_OK) err = register_handler(handle, "/api/v1/status", HTTP_GET, status_get_handler);
     if (err == ESP_OK) err = register_handler(handle, "/api/v1/admin", HTTP_GET, admin_get_handler);
@@ -1239,7 +1297,8 @@ bool start() {
 
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port = 80;
-    config.max_uri_handlers = 24;
+    config.max_uri_handlers = 28;
+    config.uri_match_fn = httpd_uri_match_wildcard;
     if (httpd_start(&server, &config) == ESP_OK) {
         https_enabled = false;
         running = (register_handlers(server) == ESP_OK);
